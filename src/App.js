@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import { Formik, Form, Field } from "formik";
-
+import { useForm } from "react-hook-form";
 // // without libraries
 
 // function App () {
@@ -81,67 +81,132 @@ import { Formik, Form, Field } from "formik";
 
 // FORMIK
 
-function App(){
-  const validateName = (value) => {
-  if(!value){
-    return 'Required';
-  } else if (value.trim() === '' || /\d/.test(value)){
-    return 'Name should not contain numbers.';
-  }
-  }
-  const validateLogin = (value) => {
-    if(!value){
-      return 'Required';
-    } else if(value.length < 5) {
-      return 'Enter more than 5 characters.'
-    }
-  }
-  const validateAge = (value) => {
-    if(!value){
-      return 'Required';
-    } else if(value < 18) {
-      return 'You need to be at least 18 y.o.'
-    }
-  }
-  const validateEmail = (value) => {
-    if(!value){
-      return 'Required';
-    } else if(!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value)){
-      return 'Enter correct email'
-    }
+// function App(){
+//   const validateName = (value) => {
+//   if(!value){
+//     return 'Required';
+//   } else if (value.trim() === '' || /\d/.test(value)){
+//     return 'Name should not contain numbers.';
+//   }
+//   }
+//   const validateLogin = (value) => {
+//     if(!value){
+//       return 'Required';
+//     } else if(value.length < 5) {
+//       return 'Enter more than 5 characters.'
+//     }
+//   }
+//   const validateAge = (value) => {
+//     if(!value){
+//       return 'Required';
+//     } else if(value < 18) {
+//       return 'You need to be at least 18 y.o.'
+//     }
+//   }
+//   const validateEmail = (value) => {
+//     if(!value){
+//       return 'Required';
+//     } else if(!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value)){
+//       return 'Enter correct email'
+//     }
+//   }
+
+//   return (
+//     <div className="wrapper">
+    
+//         <Formik
+//           initialValues={{
+//             name: '', 
+//             login: '',
+//             age: '',
+//             email: '',
+//           }}
+//           onSubmit={values => {console.log(values)}}
+//           >
+//             {({errors, touched}) => (
+//               <Form>
+//                 <label>Name</label>
+//                 <Field name="name" validate={validateName} className={errors.name && touched.name ? "invalid" : ""}/>
+//                 {errors.name && touched.name && <p>{errors.name}</p>}
+//                 <label>Login</label>
+//                 <Field name="login" validate={validateLogin} className={errors.login && touched.login ? "invalid" : ""}/>
+//                 {errors.login && touched.login && <p>{errors.login}</p>}
+//                 <label>Age</label>
+//                 <Field name="age" validate={validateAge} className={errors.age && touched.age ? "invalid" : ""}/>
+//                 {errors.age && touched.age && <p>{errors.age}</p>}
+//                 <label>Email</label>
+//                 <Field name="email" validate={validateEmail} className={errors.email && touched.email ? "invalid" : ""}/>
+//                 {errors.email && touched.email && <p>{errors.email}</p>}
+//                 <button type="submit">Sign in</button>
+//               </Form>
+//             )}
+//           </Formik>
+    
+//       </div>)
+// }
+// export default App;
+
+// REACT-HOOK-FORM
+
+const App = () => {
+
+  const {
+    register, 
+    formState: {errors},
+    handleSubmit,
+    reset
+  } = useForm({mode: "onTouched"})
+
+  const submit = (value) => {
+    console.log(value)
+    reset();
   }
 
   return (
     <div className="wrapper">
-    
-        <Formik
-          initialValues={{
-            name: '', 
-            login: '',
-            age: '',
-            email: '',
-          }}
-          onSubmit={values => {console.log(values)}}
-          >
-            {({errors, touched}) => (
-              <Form>
-                <label>Name</label>
-                <Field name="name" validate={validateName} className={errors.name && touched.name ? "invalid" : ""}/>
-                {errors.name && touched.name && <p>{errors.name}</p>}
-                <label>Login</label>
-                <Field name="login" validate={validateLogin} className={errors.login && touched.login ? "invalid" : ""}/>
-                {errors.login && touched.login && <p>{errors.login}</p>}
-                <label>Age</label>
-                <Field name="age" validate={validateAge} className={errors.age && touched.age ? "invalid" : ""}/>
-                {errors.age && touched.age && <p>{errors.age}</p>}
-                <label>Email</label>
-                <Field name="email" validate={validateEmail} className={errors.email && touched.email ? "invalid" : ""}/>
-                {errors.email && touched.email && <p>{errors.email}</p>}
-                <button type="submit">Sign in</button>
-              </Form>
-            )}
-          </Formik>
-    
-      </div>)
+      <form onSubmit={handleSubmit(submit)}>
+        <label>Name</label>
+        <input {...register('name', {
+          required: 'Required',
+          minLength: {
+            value: 1,
+            message: 'Enter minimum 1 character.'
+          }
+        })}
+        className={errors.name ? "invalid" : ""}/>
+        {errors.name && <p>{errors.name.message}</p>}
+        <label>Login</label>
+        <input {...register('login', {
+          required: 'Required',
+          minLength: {
+            value: 5,
+            message: 'Enter minimum 5 character.'
+          }
+        })}
+        className={errors.login ? "invalid" : ""}/>
+        {errors.login && <p>{errors.login.message}</p>}        
+        <label>Age</label>
+        <input {...register('age', {
+          required: 'Required',
+          min: {
+            value: 18,
+            message: 'You should be at least 18 y.o.'
+          }
+        })}
+        className={errors.age ? "invalid" : ""}/>
+        {errors.age && <p>{errors.age.message}</p>}
+        <label>Email</label>
+        <input {...register('email', {
+          required: 'Required',
+          pattern: {
+            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+            message: 'Enter correct email',
+          },
+        })}
+        className={errors.email ? "invalid" : ""}/>
+        {errors.email && <p>{errors.email.message}</p>}        <button type="submit">Sign in</button>
+      </form>
+    </div>)
 }
+
 export default App;
